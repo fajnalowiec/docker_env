@@ -1,0 +1,41 @@
+
+services:
+  web:
+    #image: php:8.3-apache
+    build:
+      context: .       # katalog, z którego Docker bierze pliki
+      dockerfile: Dockerfile.dev-www-image  # konkretny Dockerfile do użycia
+    image: dev-www-image
+    container_name: dev_www
+    ports:
+      - "8080:80"
+    volumes:
+      - /Users/fajnalowiec/php_dev_env/www:/var/www/html
+      - ~/.ssh:/root/.ssh:ro  #przekazanie kluczy ssh (tylo dev, nigdy prod!)
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: dev_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: main
+      MYSQL_USER: main
+      MYSQL_PASSWORD: main
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: dev_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+
+volumes:
+  db_data:
+

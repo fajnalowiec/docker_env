@@ -1,0 +1,51 @@
+# Uzyj obrazu
+FROM php:8.4-apache
+
+# Uzyj przy budowaniu nowego obrazu: odswiez liste pakietow, zainstaluj nano, usun (apt) cache
+#RUN apt-get update && apt-get install -y nano && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y \
+    nano \
+    curl \
+    git \
+    libicu-dev \
+    libzip-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libfreetype6-dev \
+    libldap2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalacja rozszerzeń PHP budowanych z source
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure ldap \
+    && docker-php-ext-install \
+        intl \
+        zip \
+        bcmath \
+        gd \
+        ldap \
+        pdo_mysql
+
+# Instalacja rozszerzenia Redis (przez PECL)
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Instalacja Composera (z oficjalnego obrazu)
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Instalacja Symfony CLI
+RUN curl -fsSL https://get.symfony.com/cli/installer | bash \
+    && mv /root/.symfony*/bin/symfony /usr/local/bin/symfony
+
+# Aktywacja modułów Apache
+RUN a2enmod rewrite
+
+# Ustawienia Git globalne - alias lg, ustawienie uzytkownika i emaila
+RUN git config --global user.name "Artur Dzida" \
+    && git config --global user.email "artur.dzida@gmail.com" \
+    && git config --global alias.lg "log --graph --oneline --all --decorate"
+
+# Ustawienie prompta z aktualną gałęzią git
+RUN git clone https://github.com/magicmonty/bash-git-prompt.git /opt/bash-git-prompt --depth=1 \
+    && echo 'GIT_PROMPT_ONLY_IN_REPO=1' >> /root/.bashrc \
+    && echo 'source /opt/bash-git-prompt/gitprompt.sh' >> /root/.bashrc
