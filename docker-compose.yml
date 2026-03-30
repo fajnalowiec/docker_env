@@ -25,6 +25,8 @@ services:
       MYSQL_PASSWORD: main
     volumes:
       - db_data:/var/lib/mysql
+      #utworzenie drugiej bd na tym kontenerze: konfiguracja w pliku docker/mysql-init/init.sql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
 

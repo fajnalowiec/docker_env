@@ -1,0 +1,7 @@
+CREATE DATABASE IF NOT EXISTS sf_api;
+
+CREATE USER IF NOT EXISTS 'api_root'@'%' IDENTIFIED BY 'api_root';
+
+GRANT ALL PRIVILEGES ON sf_api.* TO 'api_root'@'%';
+
+FLUSH PRIVILEGES;
